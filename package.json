@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/tmmcguire/calliope-js/issues"
   },
-  "homepage": "https://github.com/tmmcguire/calliope-js#readme"
+  "homepage": "https://github.com/tmmcguire/calliope-js#readme",
+  "dependencies": {
+    "mockingbird-sql": "^0.2.0"
+  }
 }
