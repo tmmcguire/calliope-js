@@ -1,0 +1,25 @@
+{
+  "name": "calliope",
+  "version": "0.1.0",
+  "description": "Simple, generic database interface",
+  "main": "lib.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmmcguire/calliope-js.git"
+  },
+  "keywords": [
+    "sql",
+    "database",
+    "MySQL",
+    "Oracle"
+  ],
+  "author": "Tommy M. McGuire",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/tmmcguire/calliope-js/issues"
+  },
+  "homepage": "https://github.com/tmmcguire/calliope-js#readme"
+}
