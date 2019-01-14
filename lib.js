@@ -139,6 +139,10 @@ class Db {
     }
   }
 
+  getPool() {
+    return this._adaptor.getPool();
+  }
+
 }
 
 module.exports = {
