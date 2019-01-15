@@ -30,19 +30,6 @@ class Db {
 
   }
 
-  // Begin execution of a query, returning a Promise.
-  //
-  // Execute the query given by sql, with arguments values, using DB adaptor db
-  // and (potentially null) connection.
-  _executeQueryPromise(adaptor, sql, values, connection) {
-    return new Promise((resolve, reject) => {
-      let cb = function (error, results) {
-        return (error) ? reject(error) : resolve(results);
-      };
-      return adaptor.executeQuery(sql, values, cb, connection);
-    });
-  }
-
   // Return a db query function based on a simple query object.
   //
   // The simple query object should not have a 'sql' key and returns all rows
@@ -63,7 +50,10 @@ class Db {
         return adaptor.executeQuery(sql, values, cc, null);
       } else {
         // promise
-        return this._executeQueryPromise(adaptor, sql, values, cc);
+        return new Promise((resolve, reject) => {
+          let cb = (error, results) => (error) ? reject(error) : resolve(results);
+          return adaptor.executeQuery(sql, values, cb, cc);
+        });
       }
     };
   }
@@ -94,7 +84,10 @@ class Db {
         return adaptor.executeQuery(sql, values, cc, null);
       } else {
         // promise
-        return this._executeQueryPromise(adaptor, sql, values, cc);
+        return new Promise((resolve, reject) => {
+          let cb = (error, results) => (error) ? reject(error) : resolve(results);
+          return adaptor.executeQuery(sql, values, cb, cc);
+        });
       }
     };
   }
