@@ -19,6 +19,7 @@
 'use strict';
 
 const MySQLAdaptor = require('./db-plugin-mysql');
+const OracleAdaptor = require('./db-plugin-oracle');
 
 class Db {
 
@@ -242,6 +243,7 @@ class Db {
 }
 
 module.exports = {
-  Db: Db,
-  MySQLAdaptor: MySQLAdaptor,
+  Db:            Db,
+  MySQLAdaptor:  MySQLAdaptor,
+  OracleAdaptor: OracleAdaptor,
 };
