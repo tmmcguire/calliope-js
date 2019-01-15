@@ -29,6 +29,7 @@ module.exports = function (pool) {
 
   // Execute a SQL statement using either the pool or a specified connection.
   pool.executeQuery = function (sql, args, callback, connection = null) {
+    console.log(`${sql} : ${JSON.stringify(args, null, '  ')}`);
     if (connection) {
       return connection.query(sql, args, callback);
     } else {
@@ -40,6 +41,7 @@ module.exports = function (pool) {
 
   // Specialized version of executeQuery to return the id of the new row.
   pool.executeInsert = function (sql, args, callback, connection = null) {
+    console.log(`${sql} : ${JSON.stringify(args, null, '  ')}`);
     this.executeQuery(sql, args, function (error, results) {
       if (!error) { results = results.insertId }
       callback(error, results);

@@ -66,7 +66,7 @@ function closeHandler(error) {
 // Assumption: if a connection is provided, it's in a transaction and should not
 // auto-commit.
 function executeQuery(sql, args, callback, connection = null) {
-  console.log(sql + ' : ' + JSON.stringify(args));
+  console.log(sql + ' : ' + JSON.stringify(args, null, '  '));
   if (connection) {
     connection.execute(sql, argsToParameters(args), {
       autoCommit: false,
