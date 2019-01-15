@@ -22,8 +22,41 @@ const MySQLAdaptor = require('./db-plugin-mysql');
 
 class Db {
 
-  _insertSql(_query) {
-
+  // Return a db query function based on a query object with type 'INSERT'.
+  //
+  // The values object's keys should be column names; the values should be
+  // values.
+  //
+  // When inserting a row into a table with an autoincrement primary key, the
+  // inserted id is returned from the results.
+  _insertSql(query) {
+    let adaptor = this._adaptor;
+    if (query.columns === undefined) { throw 'INSERT descriptor missing columns' }
+    if (query.table === undefined) { throw 'INSERT descriptor missing table name' }
+    return function (values, cc = null) {
+      // Filter out unknown keys
+      if (!Object.keys(values).every((k) => query.columns[k])) {
+        throw {
+          error: 'unrecognized keys on insert: ' + Object.keys(values).filter((k) => !query.columns[k])
+        };
+      }
+      let keys = Object.keys(values);
+      // allow column value translations
+      let valueParams = keys.map(key => typeof query.columns[key] === 'string' ? query.columns[key] : '?').join(', ');
+      // convert values to array of values in keys' order
+      values = keys.map(key => values[key]);
+      let sql = `INSERT INTO ${query.table} (${keys.join(',')}) VALUES (${valueParams})`;
+      if (typeof cc === 'function') {
+        // callback
+        return adaptor.executeInsert(sql, values, cc, null);
+      } else {
+        // promise
+        return new Promise((resolve, reject) => {
+          let cb = (error, results) => (error) ? reject(error) : resolve(results);
+          return adaptor.executeInsert(sql, values, cb, cc);
+        });
+      }
+    };
   }
 
   _updateSql(_query) {
