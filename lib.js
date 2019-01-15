@@ -59,8 +59,42 @@ class Db {
     };
   }
 
-  _updateSql(_query) {
-
+  // Return a db query function based on a query object with type 'UPDATE'.
+  //
+  // The values object's keys should be column names; the values should be
+  // values. A specified idColumn is used to identiy the row to update.
+  _updateSql(query) {
+    if (query.columns === undefined) { throw 'UPDATE descriptor missing columns' }
+    if (query.table === undefined) { throw 'UPDATE descriptor missing table name' }
+    if (query.idColumn === undefined) { throw 'UPDATE descriptor missing idColumn' }
+    let adaptor = this._adaptor;
+    return function (values, cc = null) {
+      let exprs = [];
+      let vals = [];
+      for (let k of Object.keys(values)) {
+        if (!query.columns[k] && k !== query.idColumn) {
+          throw { error: 'unrecognized column names on insert: ' + k };
+        } else if (k === query.idColumn) {
+          // do not include id column in update
+          continue;
+        }
+        let expr = (typeof query.columns[k] === 'string') ? query.columns[k] : '?';
+        exprs.push(`${k} = ${expr}`);
+        vals.push(values[k]);
+      }
+      vals.push(values[query.idColumn]);
+      let sql = `UPDATE ${query.table} SET ${exprs.join(', ')} WHERE ${query.idColumn} = ?`;
+      if (typeof cc === 'function') {
+        // callback
+        return adaptor.executeQuery(sql, vals, cc, null);
+      } else {
+        // promise
+        return new Promise((resolve, reject) => {
+          let cb = (error, results) => (error) ? reject(error) : resolve(results);
+          return adaptor.executeQuery(sql, vals, cb, cc);
+        });
+      }
+    };
   }
 
   // Return a db query function based on a simple query object.
@@ -136,31 +170,22 @@ class Db {
     if (queries) {
       for (let query of queries) {
         query.type = query.type || 'SELECT';
-        // let fcn = null;
         // generate the base function
         switch (query.type.toUpperCase()) {
-          // case 'INSERT':
-          //   fcn = this._insertSql(query);
-          //   break;
-          // case 'UPDATE':
-          //   fcn = this._updateSql(query);
-          //   break;
+          case 'INSERT':
+            this[query.name] = this._insertSql(query);
+            break;
+          case 'UPDATE':
+            this[query.name] = this._updateSql(query);
+            break;
           default:
             if (query.sql) {
               this[query.name] = this._givenSql(query);
-              // fcn = this._givenSql(query);
             } else {
               this[query.name] = this._simpleSql(query);
-              // fcn = this._simpleSql(query);
             }
             break;
         }
-        // // associate name to promise or base fcn
-        // if (query.promise) {
-        //   this[query.name] = this._asPromise(fcn);
-        // } else {
-        //   this[query.name] = fcn;
-        // }
       }
     }
   }
