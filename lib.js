@@ -132,6 +132,51 @@ class Db {
     }
   }
 
+  // ==================================
+
+  // Begin a transaction, returing the connection for further statements.
+  async beginTransaction() {
+    let db = this._adaptor;
+    let connection = null;
+    try {
+      connection = await db.getConnectionP();
+      await db.beginTransactionP(connection);
+      return connection;
+    } catch (error) {
+      if (connection) { await db.releaseP(connection) }
+      throw error;
+    }
+  }
+
+  // Commit a transaction and release the connection. The connection will be
+  // rolled back, in case of an error.
+  async commit(connection) {
+    let db = this._adaptor;
+    try {
+      await db.commitP(connection);
+    } catch (error) {
+      await db.rollbackP(connection);
+      throw error;
+    } finally {
+      await db.releaseP(connection);
+    }
+  }
+
+  // Roll back a transaction and release the connection.
+  async rollback(connection) {
+    let db = this._adaptor;
+    try {
+      await db.rollbackP(connection);
+    } catch (error) {
+      console.error('error rolling back transaction: ' + JSON.stringify(error, null, '  '));
+    } finally {
+      await db.releaseP(connection);
+    }
+  }
+
+  // ==================================
+
+  // Return the underlying connection pool.
   getPool() {
     return this._adaptor.getPool();
   }
