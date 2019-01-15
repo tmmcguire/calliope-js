@@ -24,7 +24,7 @@ module.exports = function (pool) {
 
   // Convert Mockingbird-sql query to legal MySQL statement and arguments.
   pool.mockingbirdToSql = function (stmt) {
-    return sql.mysql.MySql.mockingbirdToSql(stmt);
+    return sql.mysql.MySql.toSql(stmt);
   };
 
   // Execute a SQL statement using either the pool or a specified connection.
