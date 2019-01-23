@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/tmmcguire/calliope-js#readme",
   "peerDependencies": {
-    "mockingbird-sql": "^0.2.0"
+    "mockingbird-sql": "^0.3.0"
   }
 }
