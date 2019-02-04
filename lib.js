@@ -235,6 +235,11 @@ class Db {
 
   // ==================================
 
+  // Make a direct executeQuery call.
+  executeQuery(sql, args, callback, connection = null) {
+    return this._adaptor.executeQuery(sql, args, callback, connection);
+  }
+
   // Return the underlying connection pool.
   getPool() {
     return this._adaptor.getPool();

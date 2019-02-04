@@ -95,7 +95,7 @@ function executeQuery(sql, args, callback, connection = null) {
 
 module.exports = function (pool) {
 
-  pool.mockingbirdToSql = function (_stmt) { throw 'Not implemented ' };
+  pool.mockingbirdToSql = function (stmt) { return sql.oracle.Oracle.toSql(stmt) };
 
   pool.executeQuery = executeQuery;
   pool.executeInsert = executeQuery;

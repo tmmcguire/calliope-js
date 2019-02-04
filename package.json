@@ -1,6 +1,6 @@
 {
   "name": "calliope-db",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Simple, generic database interface",
   "main": "lib.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "Oracle"
   ],
   "author": "Tommy M. McGuire",
-  "license": "GPL-3.0-or-later",
+  "license": "(GPL-3.0-or-later OR MIT)",
   "bugs": {
     "url": "https://github.com/tmmcguire/calliope-js/issues"
   },

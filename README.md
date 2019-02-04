@@ -172,7 +172,22 @@ Note that the transaction support requires the use of async/await (or Promise).
 (The connection and the callback are passed as the second argument for
 usability.)
 
-Finally, as an escape mechanism, the connection pool itself can be accessed:
+One escape mechanism is to make an `executeQuery` call directly to the
+underlying database support:
+
+```javascript
+Db.executeQuery(sql, args, callback);
+```
+
+Parameters available to `executeQuery` are:
+
+- sql: The SQL statement to be executed,
+- params: the parameters to the query,
+- callback: a callback function which takes `error, results` parameters, and
+- connection (optional): the connection to use to make the query.
+
+Finally, as another escape mechanism, the database-specific connection pool
+itself can be accessed:
 
 ```javascript
 let pool = Db.getPool();
