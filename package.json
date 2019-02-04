@@ -1,6 +1,6 @@
 {
   "name": "calliope-db",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Simple, generic database interface",
   "main": "lib.js",
   "scripts": {
@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/tmmcguire/calliope-js#readme",
   "peerDependencies": {
-    "mockingbird-sql": "^0.2.0"
+    "mockingbird-sql": "^0.3.0"
   }
 }
