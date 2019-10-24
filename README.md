@@ -15,7 +15,13 @@ Simple, generic database interface
 
 The first step is to configure an object providing access to a connection pool
 to the database. This object needs to have a single method, `getPool`, which
-returns the connection pool.
+returns the database-specific connection pool.
+
+In addition, the object can (but may not) have an `options` property, whose keys can be:
+
+- `log_sql`: Boolean; log the SQL to be executed. Default: `false`.
+- `log_parameters`: Boolean; log the parameters to the SQL query; this is only
+  valid if `log_sql` is true. Default: `false`.
 
 I use a separate module for each database the application requires, containing
 the connection pool as effectively static so that there is one connection pool
@@ -23,6 +29,8 @@ for the database in the application.
 
 This object is then wrapped by the appropriate Calliope adaptor, which supplies
 the DB-specific methods needed by Calliope.
+
+### MySQL
 
 Here's an example for MySQL, using the MySQLAdaptor:
 
@@ -44,8 +52,37 @@ const pool = mysql.createPool({
 
 module.exports = calliope.MySQLAdaptor({
   getPool: () => pool,
+  options: {
+    log_sql: true,
+    log_parameters: false,
+  },
 });
 ```
+
+### Sqlite3
+
+Here is a Sqlite3 example:
+
+```javascript
+const sqlite3 = require('sqlite3');
+const calliope = require('calliope');
+
+const config = require('./configuration');
+
+const db = new sqlite3.Database(config.database,
+  (err) => {
+    return console.error(err.message);
+  });
+
+module.exports = calliope.Sqlite3Adaptor({
+  getPool: () => db,
+  options: {
+    log_sql: false,
+  }
+});
+```
+
+### Oracle
 
 And here is an Oracle example:
 

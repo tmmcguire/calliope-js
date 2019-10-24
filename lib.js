@@ -20,6 +20,7 @@
 
 const MySQLAdaptor = require('./db-plugin-mysql');
 const OracleAdaptor = require('./db-plugin-oracle');
+const Sqlite3Adaptor = require('./db-plugin-sqlite3');
 
 class Db {
 
@@ -168,6 +169,7 @@ class Db {
   // - sql: SQL statement.
   constructor(queries, dbAdaptor) {
     this._adaptor = dbAdaptor;
+    this._options = dbAdaptor.options;
     if (queries) {
       for (let query of queries) {
         query.type = query.type || 'SELECT';
@@ -248,7 +250,8 @@ class Db {
 }
 
 module.exports = {
-  Db:            Db,
-  MySQLAdaptor:  MySQLAdaptor,
-  OracleAdaptor: OracleAdaptor,
+  Db:             Db,
+  MySQLAdaptor:   MySQLAdaptor,
+  OracleAdaptor:  OracleAdaptor,
+  Sqlite3Adaptor: Sqlite3Adaptor,
 };
