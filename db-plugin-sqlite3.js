@@ -26,96 +26,83 @@ const sql = function () {
   }
 }();
 
-module.exports = function (pool) {
+module.exports = function (database) {
 
-  switch (typeof pool.options) {
-    case 'undefined': pool.options = { }; break;
+  switch (typeof database.options) {
+    case 'undefined': database.options = { }; break;
     case 'object':    break;
     default:          throw 'OPTIONS must be an object';
   }
 
-  // Convert Mockingbird-sql query to legal MySQL statement and arguments.
-  pool.mockingbirdToSql = function (stmt) {
+  // Convert Mockingbird-sql query to legal SQLite3 statement and arguments.
+  database.mockingbirdToSql = function (stmt) {
     if (sql) {
-      return sql.mysql.MySql.toSql(stmt);
+      return sql.sqlite3.Sqlite3.toSql(stmt);
     } else {
       throw 'mockingbird-sql not available';
     }
   };
 
   // Execute a SQL statement using either the pool or a specified connection.
-  pool.executeQuery = function (sql, args, callback, connection = null) {
-    if (pool.options.log_sql && pool.options.log_parameters) {
+  database.executeQuery = function (sql, args, callback, connection = null) {
+    if (database.options.log_sql && database.options.log_parameters) {
       console.log(`${sql} : ${JSON.stringify(args, null, '  ')}`);
-    } else if (pool.options.log_sql) {
+    } else if (database.options.log_sql) {
       console.log(`${sql}`);
     }
     if (connection) {
-      return connection.query(sql, args, callback);
+      return connection.all(sql, args, callback);
     } else {
       // THIS note: executeQuery must be called on an object (the 'pool' in
       // module.exports).
-      return this.getPool().query(sql, args, callback);
+      return this.getPool().all(sql, args, callback);
     }
   };
 
   // Specialized version of executeQuery to return the id of the new row.
-  pool.executeInsert = function (sql, args, callback, connection = null) {
-    if (pool.options.log_sql && pool.options.log_parameters) {
+  database.executeInsert = function (sql, args, callback, connection = null) {
+    if (database.options.log_sql && database.options.log_parameters) {
       console.log(`${sql} : ${JSON.stringify(args, null, '  ')}`);
-    } else if (pool.options.log_sql) {
+    } else if (database.options.log_sql) {
       console.log(`${sql}`);
     }
-    this.executeQuery(sql, args, function (error, results) {
-      if (!error) { results = results.insertId }
+    this.run(sql, args, function (error, results) {
+      if (!error) { results = this.lastID }
       callback(error, results);
     }, connection);
   };
 
   // Get a connection from the pool: promise-based.
-  pool.getConnectionP = function () {
-    return new Promise((resolve) => {
-      pool.getPool().getConnection((err, connection) => {
-        if (err) { throw err }
-        return resolve(connection);
-      });
-    });
+  database.getConnectionP = async function () {
+    return database.getPool();
   };
 
   // Begin a transaction on a connection: promise-based.
-  pool.beginTransactionP = function (connection) {
-    return new Promise((resolve) => {
-      connection.beginTransaction((err) => {
-        if (err) { throw err }
-        return resolve(connection);
-      });
-    });
+  database.beginTransactionP = async function (connection) {
+    connection.run('BEGIN EXCLUSIVE TRANSACTION',
+      (error) => { throw error }
+    );
+    return connection;
   };
 
   // Commit a transaction on a connection: promise-based.
-  pool.commitP = function (connection) {
-    return new Promise((resolve) => {
-      connection.commit((err) => {
-        if (err) { throw err }
-        return resolve();
-      });
-    });
+  database.commitP = async function (connection) {
+    connection.run('COMMIT TRANSACTION',
+      (error) => { throw error }
+    );
+    return connection;
   };
 
   // Roll-back a transaction on a connection: promise-based.
-  pool.rollbackP = function (connection) {
-    return new Promise((resolve) => {
-      connection.rollback(function () { resolve() });
-    });
+  database.rollbackP = async function (connection) {
+    connection.run('ROLLBACK TRANSACTION',
+      (error) => { throw error }
+    );
+    return connection;
   };
 
   // Release a connection: promise-based.
-  pool.releaseP = function (connection) {
-    return new Promise((resolve) => {
-      if (connection) { connection.release() }
-      resolve();
-    });
-  };
+  database.releaseP = function (_connection) { };
 
-  return pool;
+  return database;
 };

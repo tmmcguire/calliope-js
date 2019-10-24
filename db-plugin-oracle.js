@@ -20,7 +20,13 @@
 
 // https://www.npmjs.com/package/oracledb
 
-const sql = require('mockingbird-sql');
+const sql = function () {
+  try {
+    return require('mockingbird-sql');
+  } catch (err) {
+    return null;
+  }
+}();
 
 // Oracle uses a strange format for SQL parameters. Multiple keys can be
 // specified in the object; val is the important one. Object parameters will be
@@ -66,7 +72,11 @@ function closeHandler(error) {
 // Assumption: if a connection is provided, it's in a transaction and should not
 // auto-commit.
 function executeQuery(sql, args, callback, connection = null) {
-  console.log(sql + ' : ' + JSON.stringify(args, null, '  '));
+  if (this.options.log_sql && this.options.log_parameters) {
+    console.log(`${sql} : ${JSON.stringify(args, null, '  ')}`);
+  } else if (this.options.log_sql) {
+    console.log(`${sql}`);
+  }
   if (connection) {
     connection.execute(sql, argsToParameters(args), {
       autoCommit: false,
@@ -95,7 +105,19 @@ function executeQuery(sql, args, callback, connection = null) {
 
 module.exports = function (pool) {
 
-  pool.mockingbirdToSql = function (stmt) { return sql.oracle.Oracle.toSql(stmt) };
+  switch (typeof pool.options) {
+    case 'undefined': pool.options = { }; break;
+    case 'object':    break;
+    default:          throw 'OPTIONS must be an object';
+  }
+
+  pool.mockingbirdToSql = function (stmt) {
+    if (sql) {
+      return sql.oracle.Oracle.toSql(stmt);
+    } else {
+      throw 'mockingbird-sql not available';
+    }
+  };
 
   pool.executeQuery = executeQuery;
   pool.executeInsert = executeQuery;
